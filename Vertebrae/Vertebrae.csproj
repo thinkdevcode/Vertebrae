@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="json2.min.js" />
-    <Content Include="underscore.min.js" />
+    <Content Include="License.txt" />
     <Content Include="Vertebrae.aspx" />
     <Content Include="Vertebrae.js" />
     <Content Include="Web.config" />
