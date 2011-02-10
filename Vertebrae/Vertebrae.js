@@ -1,10 +1,11 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.5, Last updated: 2/09/2011
+// Version: 0.2.8, Last updated: 2/10/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
+// Dependancy   - https://github.com/douglascrockford/JSON-js (json2.js)
 // Contact      - gin4lyfe@gmail.com
 // 
 // See License.txt for full license
@@ -23,7 +24,7 @@
     */
     vertebrae = {
 
-        version: '0.2.5',
+        version: '0.2.8',
 
         /*
         *
@@ -182,9 +183,18 @@
                                                 succ(e.d);
                                             }
 
-                                            //data is json - parse and send back to success callback (requires json2.js)
                                             else {
-                                                succ(JSON.parse(e.d));
+
+                                                //data is json - parse and send back to success callback (requires json2.js)
+                                                //todo - add better regex to determine if json object
+                                                if (e.d.indexOf(':') != -1 && e.d.indexOf('{') != -1 && e.d.indexOf('}') != -1) {
+                                                    succ(JSON.parse(e.d));
+                                                }
+
+                                                //probably simple value - such as string - return solo value
+                                                else {
+                                                    succ(e.d);
+                                                }
                                             }
                                         }
                                     }
@@ -430,13 +440,57 @@
             */
             forEach: function (array, fn) {
 
-                var len = array.length;
+                if (array && fn) {
 
-                for (var i = 0; i < len; i++) {
+                    if (array instanceof Array && typeof fn === 'function') {
 
-                    //call fn with the item in the array and the index of item
-                    if (fn.call(array, array[i], i) === false) {
-                        break;
+                        var len = array.length;
+
+                        for (var i = 0; i < len; i++) {
+
+                            //call fn with the item in the array and the index of item
+                            if (fn.call(array, array[i], i) === false) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            },
+
+            /*
+            *   extend() - extend one object with another
+            *
+            *       destination [object] [not optional]
+            *           the object to extend
+            *
+            *       source [object] OR [array(objects)] [not optional]
+            *           the object or objects to extend the destination with
+            *
+            */
+            extend: function (destination, source) {
+
+                //verify both parameters exist
+                if (destination && source) {
+
+                    //see if multiple sources
+                    if (source instanceof Array) {
+
+                        vertebrae.util.forEach(source, function (obj) {
+
+                            for (var prop in obj) {
+
+                                destination[prop] = obj[prop];
+                            }
+                        });
+                    }
+
+                    //if not multiple sources
+                    else {
+
+                        for (var prop in source) {
+
+                            destination[prop] = source[prop];
+                        }
                     }
                 }
             }
@@ -498,6 +552,6 @@
 
     };
 
-    root.vertebrae = vertebrae;
+    return (root.vertebrae = window._$ = vertebrae);
 
 })(window);
