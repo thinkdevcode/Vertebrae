@@ -1,7 +1,7 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.8, Last updated: 2/10/2011
+// Version: 0.2.9, Last updated: 2/10/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
@@ -24,7 +24,7 @@
     */
     vertebrae = {
 
-        version: '0.2.8',
+        version: '0.2.9',
 
         /*
         *
@@ -131,76 +131,72 @@
             *           the URL to the data source/service
             *
             */
-            addHandler: function (hndlrName, serviceURL) {
+            addHandler: function (serviceName) {
 
-                //verify handler name exists and its a string
-                if (hndlrName && typeof hndlrName === 'string') {
+                //verify service url exists and its a string
+                if (serviceName && typeof serviceName === 'string') {
 
-                    //verify service url exists and its a string
-                    if (serviceURL && typeof serviceURL === 'string') {
+                    //verify handler name isnt already taken
+                    if (!this[serviceName]) {
 
-                        //verify handler name isnt already taken
-                        if (!this[hndlrName]) {
+                        //create new function with handler name
+                        //  obj [object] OR [null] [not optional] 
+                        //  succ [function] [optional]
+                        //  err [function] [optional]
+                        //  pre [function] [optional]
+                        this[serviceName] = function (obj, succ, err, pre) {
 
-                            //create new function with handler name
-                            //  obj [object] OR [null] [not optional] 
-                            //  succ [function] [optional]
-                            //  err [function] [optional]
-                            //  pre [function] [optional]
-                            this[hndlrName] = function (obj, succ, err, pre) {
+                            $.ajax({
 
-                                $.ajax({
+                                //use POST when dealing with .NET
+                                type: "POST",
 
-                                    //use POST when dealing with .NET
-                                    type: "POST",
+                                //ex: 'Default.aspx/GetUsers'
+                                url: (vertebrae.util.pageName() + '/' + serviceName),
 
-                                    //ex: 'Default.aspx/GetUsers'
-                                    url: serviceURL,
+                                //if no paramaters, pass in null, else stringify the json object (requires json2.js) 
+                                data: (obj === null) ? '{}' : JSON.stringify(obj),
 
-                                    //if no paramaters, pass in null, else stringify the json object (requires json2.js) 
-                                    data: (obj === null) ? '{}' : JSON.stringify(obj),
+                                //content type used with .NET
+                                contentType: "application/json; charset=utf-8",
 
-                                    //content type used with .NET
-                                    contentType: "application/json; charset=utf-8",
+                                //default data type 
+                                dataType: "json",
 
-                                    //default data type 
-                                    dataType: "json",
+                                //if pre-send callback exists, use it, else use blank function
+                                beforeSend: pre || function () { },
 
-                                    //if pre-send callback exists, use it, else use blank function
-                                    beforeSend: pre || function () { },
+                                //if error callback exists, use it, else use blank function
+                                error: err || function () { },
 
-                                    //if error callback exists, use it, else use blank function
-                                    error: err || function () { },
+                                //success function recieves json data from data service
+                                success: function (e) {
 
-                                    //success function recieves json data from data service
-                                    success: function (e) {
+                                    //verify success callback exists and is a function
+                                    if (typeof succ === 'function') {
 
-                                        //verify success callback exists and is a function
-                                        if (typeof succ === 'function') {
+                                        //if data that is returned is an array, do not parse
+                                        if (e.d instanceof Array) {
+                                            succ(e.d);
+                                        }
 
-                                            //if data that is returned is an array, do not parse
-                                            if (e.d instanceof Array) {
-                                                succ(e.d);
+                                        else {
+
+                                            //data is json - parse and send back to success callback (requires json2.js)
+                                            //todo - add better regex to determine if json object
+                                            if (e.d.indexOf(':') != -1 && e.d.indexOf('{') != -1 && e.d.indexOf('}') != -1) {
+                                                succ(JSON.parse(e.d));
                                             }
 
+                                            //probably simple value - such as string - return solo value
                                             else {
-
-                                                //data is json - parse and send back to success callback (requires json2.js)
-                                                //todo - add better regex to determine if json object
-                                                if (e.d.indexOf(':') != -1 && e.d.indexOf('{') != -1 && e.d.indexOf('}') != -1) {
-                                                    succ(JSON.parse(e.d));
-                                                }
-
-                                                //probably simple value - such as string - return solo value
-                                                else {
-                                                    succ(e.d);
-                                                }
+                                                succ(e.d);
                                             }
                                         }
                                     }
-                                });
-                            };
-                        }
+                                }
+                            });
+                        };
                     }
                 }
             },
@@ -493,6 +489,14 @@
                         }
                     }
                 }
+            },
+
+            /*
+            *   pageName() - return the current pages name (with extension)
+            *
+            */
+            pageName: function () {
+                return (window.location.pathname).substring((window.location.pathname).lastIndexOf('/') + 1);
             }
 
         },
