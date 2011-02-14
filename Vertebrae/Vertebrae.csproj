@@ -52,7 +52,7 @@
   <ItemGroup>
     <Content Include="json2.min.js" />
     <Content Include="License.txt" />
-    <Content Include="Vertebrae.aspx" />
+    <Content Include="Default.aspx" />
     <Content Include="Vertebrae.js" />
     <Content Include="Vertebrae.min.js" />
     <Content Include="Web.config" />
@@ -65,12 +65,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Vertebrae.aspx.cs">
-      <DependentUpon>Vertebrae.aspx</DependentUpon>
+    <Compile Include="Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Vertebrae.aspx.designer.cs">
-      <DependentUpon>Vertebrae.aspx</DependentUpon>
+    <Compile Include="Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

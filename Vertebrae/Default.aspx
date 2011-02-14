@@ -1,10 +1,10 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Vertebrae.aspx.cs" Inherits="Vertebrae.Vertebrae" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="Vertebrae.Vertebrae" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Vertebrae 0.2.9</title>
+    <title>Vertebrae 0.2.10</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js" type="text/javascript"></script>
     <script src="json2.min.js" type="text/javascript"></script>
@@ -19,6 +19,11 @@
 
         //give it some boooooooooooones
         _$.util.extend(app, vertebrae);
+
+
+        //set the default name of page in case our data handler cant see it - used 
+        //  mainly for default pages (index.html, default.aspx, etc)
+        app.data.setDefaultPageName('Default.aspx');
 
 
         //create our ajax data handlers

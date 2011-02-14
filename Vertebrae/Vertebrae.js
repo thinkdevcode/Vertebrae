@@ -1,7 +1,7 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.9, Last updated: 2/10/2011
+// Version: 0.2.10, Last updated: 2/14/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
@@ -24,7 +24,7 @@
     */
     vertebrae = {
 
-        version: '0.2.9',
+        version: '0.2.10',
 
         /*
         *
@@ -145,6 +145,8 @@
                         //  err [function] [optional]
                         //  pre [function] [optional]
                         this[serviceName] = function (obj, succ, err, pre) {
+                            
+                            var currpage = vertebrae.util.pageName();
 
                             $.ajax({
 
@@ -152,7 +154,11 @@
                                 type: "POST",
 
                                 //ex: 'Default.aspx/GetUsers'
-                                url: (vertebrae.util.pageName() + '/' + serviceName),
+                                url: (currpage !== '') ? 
+                                        (currpage + '/' + serviceName) :
+                                            (typeof this.defPageName === 'string') ?
+                                                (this.defPageName + '/' + serviceName) : 
+                                                    null, //passing null will throw the error callback
 
                                 //if no paramaters, pass in null, else stringify the json object (requires json2.js) 
                                 data: (obj === null) ? '{}' : JSON.stringify(obj),
@@ -223,6 +229,19 @@
                     if (typeof stopHndlr === 'function') {
                         Sys.WebForms.PageRequestManager.getInstance().add_endRequest(stopHndlr);
                     }
+                }
+            },
+
+            /*
+            *   setDefaultPageName() - set the default page name to refer to when pageName() returns empty
+            *
+            *       pageName [string] [not optional]
+            *           the name of the page ('Default.aspx')
+            *
+            */
+            setDefaultPageName: function (pageName) {
+                if (pageName && typeof pageName === 'string') {
+                    this.defPageName = pageName;
                 }
             }
 
