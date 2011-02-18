@@ -1,7 +1,7 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.10, Last updated: 2/14/2011
+// Version: 0.2.11, Last updated: 2/18/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
@@ -24,7 +24,7 @@
     */
     vertebrae = {
 
-        version: '0.2.10',
+        version: '0.2.11',
 
         /*
         *
@@ -34,10 +34,10 @@
         view: {
 
             /*
-            *   add() - add a jquery object to view cache
+            *   add() - add jquery object(s) to view cache
             *
-            *       ctrlName [string] [not optional]
-            *           the name of the control
+            *       ctrlName [string] OR [object] [not optional]
+            *           the name of the control or a map of controls
             *
             *       jqObject [object] [not optional]
             *           the jQuery object to add to cache
@@ -49,19 +49,29 @@
                 this.cache = this.cache || {};
 
                 //verify ctrlName exists and is a string
-                if (ctrlName && typeof ctrlName === 'string') {
+                if (ctrlName) {
 
-                    //verify jqObject exists and is an object
-                    if (jqObject && typeof jqObject === 'object') {
+                    if (typeof ctrlName === 'string') {
 
-                        //verify control doesnt already exist in cache
-                        if (!this.cache[ctrlName]) {
+                        //verify jqObject exists and is an object
+                        if (jqObject && typeof jqObject === 'object') {
 
-                            //add control to cache
-                            this.cache[ctrlName] = jqObject;
+                            //verify control doesnt already exist in cache
+                            if (!this.cache[ctrlName]) {
+
+                                //add control to cache
+                                this.cache[ctrlName] = jqObject;
+                            }
                         }
                     }
+
+                    if (typeof ctrlName === 'object') {
+
+                        vertebrae.util.extend(this.cache, ctrlName);
+
+                    }
                 }
+
             },
 
             /*
@@ -145,7 +155,7 @@
                         //  err [function] [optional]
                         //  pre [function] [optional]
                         this[serviceName] = function (obj, succ, err, pre) {
-                            
+
                             var currpage = vertebrae.util.pageName();
 
                             $.ajax({
@@ -154,10 +164,10 @@
                                 type: "POST",
 
                                 //ex: 'Default.aspx/GetUsers'
-                                url: (currpage !== '') ? 
+                                url: (currpage !== '') ?
                                         (currpage + '/' + serviceName) :
                                             (typeof this.defPageName === 'string') ?
-                                                (this.defPageName + '/' + serviceName) : 
+                                                (this.defPageName + '/' + serviceName) :
                                                     null, //passing null will throw the error callback
 
                                 //if no paramaters, pass in null, else stringify the json object (requires json2.js) 
