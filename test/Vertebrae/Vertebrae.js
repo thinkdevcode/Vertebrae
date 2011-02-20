@@ -1,7 +1,7 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.11, Last updated: 2/18/2011
+// Version: 0.2.12, Last updated: 2/18/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
@@ -15,16 +15,14 @@
 
 (function (window, undefined) {
 
-    var root = this,
-
     /*
     *
     *   Give your application some bones!!
     *
     */
-    vertebrae = {
+    var vertebrae = {
 
-        version: '0.2.11',
+        version: '0.2.12',
 
         /*
         *
@@ -45,31 +43,19 @@
             */
             add: function (ctrlName, jqObject) {
 
-                //create cache if doesn't exist
                 this.cache = this.cache || {};
 
-                //verify ctrlName exists and is a string
-                if (ctrlName) {
+                if (typeof ctrlName === 'string') {
+                    if (typeof jqObject === 'object') {
 
-                    if (typeof ctrlName === 'string') {
-
-                        //verify jqObject exists and is an object
-                        if (jqObject && typeof jqObject === 'object') {
-
-                            //verify control doesnt already exist in cache
-                            if (!this.cache[ctrlName]) {
-
-                                //add control to cache
-                                this.cache[ctrlName] = jqObject;
-                            }
+                        if (!this.cache[ctrlName]) {
+                            this.cache[ctrlName] = jqObject;
                         }
                     }
+                }
 
-                    if (typeof ctrlName === 'object') {
-
-                        vertebrae.util.extend(this.cache, ctrlName);
-
-                    }
+                if (typeof ctrlName === 'object') {
+                    _$.util.extend(this.cache, ctrlName);
                 }
 
             },
@@ -77,8 +63,8 @@
             /*
             *   upd() - update a jquery object in view cache
             *
-            *       ctrlName [string] [not optional]
-            *           the name of the control
+            *       ctrlName [string] OR [object] [not optional]
+            *           the name of the control or a map of controls
             *
             *       jqObject [object] [not optional]
             *           the jQuery object to update in the cache
@@ -86,19 +72,17 @@
             */
             upd: function (ctrlName, jqObject) {
 
-                //verify ctrlName exists and is a string
-                if (ctrlName && typeof ctrlName === 'string') {
+                if (typeof ctrlName === 'string') {
+                    if (typeof jqObject === 'object') {
 
-                    //verify jqObject exists and is an object
-                    if (jqObject && typeof jqObject === 'object') {
-
-                        //verify cache exists and control exists in cache
                         if (this.cache && this.cache[ctrlName]) {
-
-                            //update object
                             this.cache[ctrlName] = jqObject;
                         }
                     }
+                }
+
+                else if (typeof ctrlName === 'object') {
+                    _$.util.extend(this.cache, ctrlName);
                 }
             },
 
@@ -110,13 +94,10 @@
             *
             */
             get: function (ctrlName) {
-                //verify ctrlName exists and is a string
-                if (ctrlName && typeof ctrlName === 'string') {
 
-                    //verify cache exists and the control inside of it
+                if (typeof ctrlName === 'string') {
+
                     if (this.cache && this.cache[ctrlName]) {
-
-                        //return the jQ object
                         return this.cache[ctrlName];
                     }
                 }
@@ -143,10 +124,8 @@
             */
             addHandler: function (serviceName) {
 
-                //verify service url exists and its a string
-                if (serviceName && typeof serviceName === 'string') {
+                if (typeof serviceName === 'string') {
 
-                    //verify handler name isnt already taken
                     if (!this[serviceName]) {
 
                         //create new function with handler name
@@ -156,7 +135,7 @@
                         //  pre [function] [optional]
                         this[serviceName] = function (obj, succ, err, pre) {
 
-                            var currpage = vertebrae.util.pageName();
+                            var currpage = _$.util.pageName();
 
                             $.ajax({
 
@@ -263,7 +242,7 @@
         *
         */
         event: {
-
+        
             /*
             *   fire() - fire a custom event
             *
@@ -273,31 +252,20 @@
             */
             fire: function (evntName) {
 
-                //verify event name is defined and event cache exists
-                if (evntName && this.evntCache) {
-
-                    //determine if evntName is a string
+                if (this.evntCache) {
                     if (typeof evntName === 'string') {
 
-                        //verify event exists in cache
                         if (this.evntCache[evntName]) {
-
-                            //loop through event stack and fire event handlers
-                            vertebrae.util.forEach(this.evntCache[evntName], function (fn) { fn(); });
+                            _$.util.forEach(this.evntCache[evntName], function (fn) { fn(); });
                         }
                     }
 
-                    //determine if evntName is an array
                     else if (evntName instanceof Array) {
 
-                        //loop through events
-                        vertebrae.util.forEach(evntName, function (evnt) {
+                        _$.util.forEach(evntName, function (evnt) {
 
-                            //verify event exists in stack
                             if (this.evntCache[evnt]) {
-
-                                //loop through event stack and fire event handlers
-                                vertebrae.util.forEach(this.evntCache[evnt], function (fn) { fn(); });
+                                _$.util.forEach(this.evntCache[evnt], function (fn) { fn(); });
                             }
                         });
                     }
@@ -316,19 +284,12 @@
             */
             addHandler: function (hndlrName, hndlrFn) {
 
-                //verify handler name exists and is a string
-                if (hndlrName && typeof hndlrName === 'string') {
+                this.hndlrCache = this.hndlrCache || {};
 
-                    //verify handler function exists and is a function
-                    if (hndlrFn && typeof hndlrFn === 'function') {
+                if (typeof hndlrName === 'string') {
+                    if (typeof hndlrFn === 'function') {
 
-                        //create handler cache if it doesnt exist
-                        this.hndlrCache = this.hndlrCache || {};
-
-                        //verify handler isnt already in cache (by name)
                         if (!this.hndlrCache[hndlrName]) {
-
-                            //add handler to cache
                             this.hndlrCache[hndlrName] = hndlrFn;
                         }
                     }
@@ -344,13 +305,9 @@
             */
             getHandler: function (hndlrName) {
 
-                //verify handler name exists and is a string
-                if (hndlrName && typeof hndlrName === 'string') {
+                if (typeof hndlrName === 'string') {
 
-                    //see if handler exists in cache
                     if (this.hndlrCache[hndlrName]) {
-
-                        //return handler
                         return this.hndlrCache[hndlrName];
                     }
                 }
@@ -372,61 +329,43 @@
             */
             add: function (evntName, hndlrName, ctrlName) {
 
-                //create a cache for custom events if does not exist
                 this.evntCache = this.evntCache || {};
 
-                //verify evntName exists and is a string
-                if (evntName && typeof evntName === 'string') {
+                if (typeof evntName === 'string') {
+                    if (typeof hndlrName === 'string') {
 
-                    //verify hndlrName exists and is a string
-                    if (hndlrName && typeof hndlrName === 'string') {
-
-                        //grab the handler from cache
                         var hndlr = this.getHandler(hndlrName);
 
-                        //verify it exists and it is a function
-                        if (hndlr && typeof hndlr === 'function') {
-
-                            //verify ctrlName exists and is a string
-                            if (ctrlName && typeof ctrlName === 'string') {
+                        if (typeof hndlr === 'function') {
+                            if (typeof ctrlName === 'string') {
 
                                 //grab the jQuery object from view cache
-                                var ctrl = vertebrae.view.get(ctrlName);
+                                var ctrl = _$.view.get(ctrlName);
 
-                                //verify it exists is an object
-                                if (ctrl && typeof ctrl === 'object') {
-
-                                    //bind it
+                                if (typeof ctrl === 'object') {
                                     ctrl.bind(evntName, hndlr);
                                 }
                             }
 
                             // create a custom event
                             else {
-
-                                //add a new event to event cache if one doesnt already exist
                                 this.evntCache[evntName] = this.evntCache[evntName] || [];
-
-                                //push the hndlr onto the events stack
                                 this.evntCache[evntName].push(hndlr);
                             }
                         }
                     }
 
-                    //if hndlrName is an array of handlers
                     else if (hndlrName instanceof Array) {
-
-                        //verify ctrlName exists and is a string
-                        if (ctrlName && typeof ctrlName === 'string') {
+                        if (typeof ctrlName === 'string') {
 
                             //grab the jQuery object from view cache
-                            var ctrl = vertebrae.view.get(ctrlName);
+                            var ctrl = _$.view.get(ctrlName);
 
                             //verify it exists is an object
                             if (ctrl && typeof ctrl === 'object') {
 
                                 //loop through and bind events to jQuery object
-                                vertebrae.util.forEach(hndlrName, function (fn) {
+                                _$.util.forEach(hndlrName, function (fn) {
                                     ctrl.bind(evntName, fn);
                                 });
                             }
@@ -439,8 +378,8 @@
                             this.evntCache[evntName] = this.evntCache[evntName] || [];
 
                             //loop through and push the hndlr's onto the events stack
-                            vertebrae.util.forEach(hndlrName, function (fn) {
-                                vertebrae.event.evntCache[evntName].push(vertebrae.event.getHandler(fn));
+                            _$.util.forEach(hndlrName, function (fn) {
+                                _$.event.evntCache[evntName].push(_$.event.getHandler(fn));
                             });
                         }
                     }
@@ -465,18 +404,12 @@
             */
             forEach: function (array, fn) {
 
-                if (array && fn) {
-
-                    if (array instanceof Array && typeof fn === 'function') {
-
-                        var len = array.length;
-
-                        for (var i = 0; i < len; i++) {
-
-                            //call fn with the item in the array and the index of item
-                            if (fn.call(array, array[i], i) === false) {
-                                break;
-                            }
+                if (array instanceof Array && typeof fn === 'function') {
+                    var len = array.length;
+                    for (var i = 0; i < len; i++) {
+                        //call fn with the item in the array and the index of item
+                        if (fn.call(array, array[i], i) === false) {
+                            break;
                         }
                     }
                 }
@@ -494,16 +427,11 @@
             */
             extend: function (destination, source) {
 
-                //verify both parameters exist
                 if (destination && source) {
-
-                    //see if multiple sources
                     if (source instanceof Array) {
 
-                        vertebrae.util.forEach(source, function (obj) {
-
+                        _$.util.forEach(source, function (obj) {
                             for (var prop in obj) {
-
                                 destination[prop] = obj[prop];
                             }
                         });
@@ -511,9 +439,7 @@
 
                     //if not multiple sources
                     else {
-
                         for (var prop in source) {
-
                             destination[prop] = source[prop];
                         }
                     }
@@ -585,6 +511,6 @@
 
     };
 
-    return (root.vertebrae = window._$ = vertebrae);
+    return (window.vertebrae = window._$ = vertebrae);
 
 })(window);
