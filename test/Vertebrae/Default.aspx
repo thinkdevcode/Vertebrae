@@ -4,13 +4,15 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Vertebrae 0.2.14</title>
+    <title>Vertebrae 0.2.15</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js" type="text/javascript"></script>
     <script src="json2.min.js" type="text/javascript"></script>
     <script src="Vertebrae.js" type="text/javascript"></script>
 
     <script type="text/javascript" language="javascript">
+
+        (function () {
 
         //set the default name of page in case our data handler cant see it - used 
         //  mainly for default pages (index.html, default.aspx, etc)
@@ -22,31 +24,30 @@
 
 
         //this handler gets fired on page load and adds controls to view
-        _$.event.addHandler('SetView', function () {
-
+        function set_View() {
             _$.view.add({
-            
-                'Link_FireEvent'  : $('#lnkFireEvent1'),
+                'Link_FireEvent': $('#lnkFireEvent1'),
                 'Link_FireAjaxReq': $('#lnkAjaxReq')
-
             });
-
-        });
-
-
-        //this handler manipulates controls in the view
-        _$.event.addHandler('ViewEvents', function () {
-            //but its empty right now
-        });
+        }
 
 
-        _$.event.addHandler('Link_FireEvent_Click', function () {
+        function bind_Events() {
+            _$.event.add('click', link_FireEvent_Click, 'Link_FireEvent');
+            _$.event.add('click', link_FireAjaxReq_Click, 'Link_FireAjaxReq');
+        }
+
+
+        function link_FireEvent_Click() {
             alert('hi! This got clicked');
-        });
+        }
 
+        //this is an example handler you can fire on global ajax requests
+        function globalAjaxHandler() {
+            alert('starting ajax request');
+        }
 
-        _$.event.addHandler('Link_FireAjaxReq_Click', function () {
-
+        function link_FireAjaxReq_Click() {
             _$.data.GetTestArray(null,
                 function (data) {
                     $('body').append('<br />' + data.toString() + '<br />');
@@ -57,27 +58,16 @@
                 function () {
                     _$.event.fire('globalajax');
                     $('body').append('<br /> presend function fired before ajax request <br />');
-            });
-        });
-
-
-        //this is an example handler you can fire on global ajax requests
-        _$.event.addHandler('GlobalAjaxHandler', function () {
-            alert('starting ajax request');
-        });
-
+                });
+        }
 
         //add a custom event (note - if view control name is given then a jQuery bind function called)
-        _$.event.add('pageload', ['SetView', 'ViewEvents']);
-        _$.event.add('globalajax', 'GlobalAjaxHandler');
+        _$.event.add('pageload', [set_View, bind_Events]);
+        _$.event.add('globalajax', globalAjaxHandler);
 
+        $(function () { _$.event.fire('pageload'); });
 
-        $(function () {
-            _$.event.fire('pageload');
-            _$.event.add('click', 'Link_FireEvent_Click', 'Link_FireEvent');
-            _$.event.add('click', 'Link_FireAjaxReq_Click', 'Link_FireAjaxReq');
-        });
-
+    })();
 
     </script>
 </head>

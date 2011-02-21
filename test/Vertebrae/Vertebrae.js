@@ -1,7 +1,7 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.14, Last updated: 2/21/2011
+// Version: 0.2.15, Last updated: 2/21/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
@@ -22,7 +22,7 @@
     */
     var vertebrae = {
 
-        version: '0.2.14',
+        version: '0.2.15',
 
         /*
         *
@@ -322,8 +322,9 @@
             *       evntName [string] [not optional] 
             *           the event to bind to (can be custom event name or jQuery bind event)
             *
-            *       hndlrName [string] OR [array(strings)] [not optional]  
-            *           this can either be a string or an array of strings of event handler names
+            *       hndlrName [string] OR [array(strings)] OR [function] OR [array(function)] [not optional]  
+            *           this can either be a string or an array of strings of event handler names, or 
+            *           functions/array of functions
             *
             *       ctrlName [string] [optional]
             *           this is the jQuery object to perform a bind function on (only used for jQuery
@@ -358,18 +359,40 @@
                         }
                     }
 
+                    else if (typeof hndlrName === 'function') {
+                        if (typeof ctrlName === 'string') {
+
+                            //grab the jQuery object from view cache
+                            var ctrl = _$.view.get(ctrlName);
+
+                            if (typeof ctrl === 'object') {
+                                ctrl.bind(evntName, hndlrName);
+                            }
+                        }
+
+                        // create a custom event
+                        else {
+                            this.evntCache[evntName] = this.evntCache[evntName] || [];
+                            this.evntCache[evntName].push(hndlrName);
+                        }
+                    }
+
                     else if (hndlrName instanceof Array) {
                         if (typeof ctrlName === 'string') {
 
                             //grab the jQuery object from view cache
                             var ctrl = _$.view.get(ctrlName);
 
-                            //verify it exists is an object
-                            if (ctrl && typeof ctrl === 'object') {
+                            if (typeof ctrl === 'object') {
 
                                 //loop through and bind events to jQuery object
                                 _$.util.forEach(hndlrName, function (fn) {
-                                    ctrl.bind(evntName, fn);
+                                    if (typeof fn === 'string') {
+                                        ctrl.bind(evntName, _$.event.getHandler(fn));
+                                    }
+                                    else if (typeof fn === 'function') {
+                                        ctrl.bind(evntName, fn);
+                                    }
                                 });
                             }
                         }
@@ -382,7 +405,12 @@
 
                             //loop through and push the hndlr's onto the events stack
                             _$.util.forEach(hndlrName, function (fn) {
-                                _$.event.evntCache[evntName].push(_$.event.getHandler(fn));
+                                if (typeof fn === 'string') {
+                                    _$.event.evntCache[evntName].push(_$.event.getHandler(fn));
+                                }
+                                else if (typeof fn === 'function') {
+                                    _$.event.evntCache[evntName].push(fn);
+                                }
                             });
                         }
                     }
