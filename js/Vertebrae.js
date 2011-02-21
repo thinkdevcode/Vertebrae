@@ -1,7 +1,7 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.13, Last updated: 2/21/2011
+// Version: 0.2.14, Last updated: 2/21/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
@@ -22,7 +22,7 @@
     */
     var vertebrae = {
 
-        version: '0.2.13',
+        version: '0.2.14',
 
         /*
         *
@@ -294,8 +294,8 @@
                         }
                     }
                 }
-                else if (hndlrName instanceof Array) {
-                    _$.util.extend(this.hndlrCache[hndlrName], hndlrName);
+                else if (typeof hndlrName === 'object') {
+                    _$.util.extend(this.hndlrCache, hndlrName);
                 }
             },
 
