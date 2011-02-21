@@ -1,7 +1,7 @@
 ﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.12, Last updated: 2/18/2011
+// Version: 0.2.13, Last updated: 2/21/2011
 // 
 // Project Home - http://www.pexelu.com/vert
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
@@ -22,7 +22,7 @@
     */
     var vertebrae = {
 
-        version: '0.2.12',
+        version: '0.2.13',
 
         /*
         *
@@ -115,11 +115,8 @@
             /*
             *   addHandler() - create a handler to a data service
             *
-            *       hndlrName [string] [not optional]
-            *           the name of the handler
-            *
-            *       serviceURL [string] [not optional]
-            *           the URL to the data source/service
+            *       serviceName [string] OR [array(string)] [not optional]
+            *           the URL(s) to the data source/service
             *
             */
             addHandler: function (serviceName) {
@@ -194,6 +191,9 @@
                         };
                     }
                 }
+                else if (serviceName instanceof Array) {
+                    _$.util.forEach(serviceName, function (x, i) { _$.data.addHandler(x); });
+                }
             },
 
             /*
@@ -242,7 +242,7 @@
         *
         */
         event: {
-        
+
             /*
             *   fire() - fire a custom event
             *
@@ -275,8 +275,8 @@
             /*
             *   addHandler() - create a custom event handler
             *
-            *       hndlrName [string] [not optional]
-            *           the name of the handler
+            *       hndlrName [string] OR [object] [not optional]
+            *           the name of the handler - or object with multiple handlers
             *
             *       hndlrFn [function] [not optional]
             *           the handler callback
@@ -293,6 +293,9 @@
                             this.hndlrCache[hndlrName] = hndlrFn;
                         }
                     }
+                }
+                else if (hndlrName instanceof Array) {
+                    _$.util.extend(this.hndlrCache[hndlrName], hndlrName);
                 }
             },
 
