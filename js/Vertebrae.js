@@ -75,7 +75,7 @@
                 if (typeof ctrlName === 'string') {
                     if (typeof jqObject === 'object') {
 
-                        if (this.cache && this.cache[ctrlName]) {
+                        if (this.cache) {
                             this.cache[ctrlName] = jqObject;
                         }
                     }
