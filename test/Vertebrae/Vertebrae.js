@@ -1,9 +1,9 @@
-﻿/// <reference path="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.4.4-vsdoc.js" />
+﻿/// <reference path="http://damianedwards.com/files/jquery/jquery-1.5-vsdoc.js" />
 
 // Vertebrae Framework 
-// Version: 0.2.15, Last updated: 2/21/2011
+// Version: 0.3.0, Last updated: 2/25/2011
 // 
-// Project Home - http://www.pexelu.com/vert
+// Project Home - http://thinkdevcode.wordpress.com
 // GitHub       - https://github.com/thinkdevcode/Vertebrae
 // Dependancy   - https://github.com/douglascrockford/JSON-js (json2.js)
 // Contact      - gin4lyfe@gmail.com
@@ -15,6 +15,8 @@
 
 (function (window, undefined) {
 
+    if (!jQuery) { return; }
+
     /*
     *
     *   Give your application some bones!!
@@ -22,7 +24,7 @@
     */
     var vertebrae = {
 
-        version: '0.2.15',
+        version: '0.3.0',
 
         /*
         *
@@ -46,7 +48,7 @@
                 this.cache = this.cache || {};
 
                 if (typeof ctrlName === 'string') {
-                    if (typeof jqObject === 'object') {
+                    if (jqObject instanceof jQuery) {
 
                         if (!this.cache[ctrlName]) {
                             this.cache[ctrlName] = jqObject;
@@ -55,7 +57,7 @@
                 }
 
                 if (typeof ctrlName === 'object') {
-                    _$.util.extend(this.cache, ctrlName);
+                    jQuery.extend(this.cache, ctrlName);
                 }
 
             },
@@ -73,7 +75,7 @@
             upd: function (ctrlName, jqObject) {
 
                 if (typeof ctrlName === 'string') {
-                    if (typeof jqObject === 'object') {
+                    if (jqObject instanceof jQuery) {
 
                         if (this.cache) {
                             this.cache[ctrlName] = jqObject;
@@ -82,7 +84,7 @@
                 }
 
                 else if (typeof ctrlName === 'object') {
-                    _$.util.extend(this.cache, ctrlName);
+                    jQuery.extend(this.cache, ctrlName);
                 }
             },
 
@@ -130,14 +132,17 @@
                         //  succ [function] [optional]
                         //  err [function] [optional]
                         //  pre [function] [optional]
-                        this[serviceName] = function (obj, succ, err, pre) {
+                        //  sync [boolean] [optional]
+                        this[serviceName] = function (obj, succ, err, pre, sync) {
 
-                            var currpage = _$.util.pageName();
+                            var currpage = this.pageName();
 
-                            $.ajax({
+                            jQuery.ajax({
 
                                 //use POST when dealing with .NET
-                                type: "POST",
+                                type: 'POST',
+
+                                async: ((typeof sync === 'boolean') ? sync : true),
 
                                 //ex: 'Default.aspx/GetUsers'
                                 url: (currpage !== '') ?
@@ -150,10 +155,10 @@
                                 data: (obj === null) ? '{}' : JSON.stringify(obj),
 
                                 //content type used with .NET
-                                contentType: "application/json; charset=utf-8",
+                                contentType: 'application/json; charset=utf-8',
 
                                 //default data type 
-                                dataType: "json",
+                                dataType: 'json',
 
                                 //if pre-send callback exists, use it, else use blank function
                                 beforeSend: pre || function () { },
@@ -192,7 +197,7 @@
                     }
                 }
                 else if (serviceName instanceof Array) {
-                    _$.util.forEach(serviceName, function (x, i) { _$.data.addHandler(x); });
+                    jQuery.each(serviceName, function (i, x) { vertebrae.data.addHandler(x); });
                 }
             },
 
@@ -207,14 +212,10 @@
             *
             */
             regAjaxEvents: function (startHndlr, stopHndlr) {
-
-                //verify Sys namespace exists
                 if (Sys) {
-
                     if (typeof startHndlr === 'function') {
                         Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(startHndlr);
                     }
-
                     if (typeof stopHndlr === 'function') {
                         Sys.WebForms.PageRequestManager.getInstance().add_endRequest(stopHndlr);
                     }
@@ -229,9 +230,17 @@
             *
             */
             setDefaultPageName: function (pageName) {
-                if (pageName && typeof pageName === 'string') {
+                if (typeof pageName === 'string') {
                     this.defPageName = pageName;
                 }
+            },
+
+            /*
+            *   pageName() - return the current pages name (with extension)
+            *
+            */
+            pageName: function () {
+                return (window.location.pathname).substring((window.location.pathname).lastIndexOf('/') + 1);
             }
 
         },
@@ -256,16 +265,16 @@
                     if (typeof evntName === 'string') {
 
                         if (this.evntCache[evntName]) {
-                            _$.util.forEach(this.evntCache[evntName], function (fn) { fn(); });
+                            jQuery.each(this.evntCache[evntName], function (i, fn) { fn(); });
                         }
                     }
 
                     else if (evntName instanceof Array) {
 
-                        _$.util.forEach(evntName, function (evnt) {
+                        jQuery.each(evntName, function (evnt) {
 
                             if (this.evntCache[evnt]) {
-                                _$.util.forEach(this.evntCache[evnt], function (fn) { fn(); });
+                                jQuery.each(this.evntCache[evnt], function (i, fn) { fn(); });
                             }
                         });
                     }
@@ -283,19 +292,16 @@
             *
             */
             addHandler: function (hndlrName, hndlrFn) {
-
                 this.hndlrCache = this.hndlrCache || {};
-
                 if (typeof hndlrName === 'string') {
                     if (typeof hndlrFn === 'function') {
-
                         if (!this.hndlrCache[hndlrName]) {
                             this.hndlrCache[hndlrName] = hndlrFn;
                         }
                     }
                 }
                 else if (typeof hndlrName === 'object') {
-                    _$.util.extend(this.hndlrCache, hndlrName);
+                    jQuery.extend(this.hndlrCache, hndlrName);
                 }
             },
 
@@ -307,12 +313,8 @@
             *
             */
             getHandler: function (hndlrName) {
-
                 if (typeof hndlrName === 'string') {
-
-                    if (this.hndlrCache[hndlrName]) {
-                        return this.hndlrCache[hndlrName];
-                    }
+                    return this.hndlrCache[hndlrName];
                 }
             },
 
@@ -332,7 +334,6 @@
             *                                       
             */
             add: function (evntName, hndlrName, ctrlName) {
-
                 this.evntCache = this.evntCache || {};
 
                 if (typeof evntName === 'string') {
@@ -343,14 +344,12 @@
                         if (typeof hndlr === 'function') {
                             if (typeof ctrlName === 'string') {
 
-                                //grab the jQuery object from view cache
-                                var ctrl = _$.view.get(ctrlName);
+                                var ctrl = vertebrae.view.get(ctrlName); //grab the jQuery object from view cache
 
-                                if (typeof ctrl === 'object') {
+                                if (ctrl instanceof jQuery) {
                                     ctrl.bind(evntName, hndlr);
                                 }
                             }
-
                             // create a custom event
                             else {
                                 this.evntCache[evntName] = this.evntCache[evntName] || [];
@@ -358,37 +357,30 @@
                             }
                         }
                     }
-
                     else if (typeof hndlrName === 'function') {
                         if (typeof ctrlName === 'string') {
-
-                            //grab the jQuery object from view cache
-                            var ctrl = _$.view.get(ctrlName);
-
-                            if (typeof ctrl === 'object') {
+                            
+                            var ctrl = vertebrae.view.get(ctrlName); //grab the jQuery object from view cache
+                            if (ctrl instanceof jQuery) {
                                 ctrl.bind(evntName, hndlrName);
                             }
                         }
-
                         // create a custom event
                         else {
                             this.evntCache[evntName] = this.evntCache[evntName] || [];
                             this.evntCache[evntName].push(hndlrName);
                         }
                     }
-
                     else if (hndlrName instanceof Array) {
                         if (typeof ctrlName === 'string') {
+                            
+                            var ctrl = vertebrae.view.get(ctrlName); //grab the jQuery object from view cache
 
-                            //grab the jQuery object from view cache
-                            var ctrl = _$.view.get(ctrlName);
-
-                            if (typeof ctrl === 'object') {
-
+                            if (ctrl instanceof jQuery) {
                                 //loop through and bind events to jQuery object
-                                _$.util.forEach(hndlrName, function (fn) {
+                                jQuery.each(hndlrName, function (i, fn) {
                                     if (typeof fn === 'string') {
-                                        ctrl.bind(evntName, _$.event.getHandler(fn));
+                                        ctrl.bind(evntName, vertebrae.event.getHandler(fn));
                                     }
                                     else if (typeof fn === 'function') {
                                         ctrl.bind(evntName, fn);
@@ -396,20 +388,17 @@
                                 });
                             }
                         }
-
                         // create a custom event
                         else {
-
                             //add a new event to custom cache if one doesnt already exist
                             this.evntCache[evntName] = this.evntCache[evntName] || [];
-
                             //loop through and push the hndlr's onto the events stack
-                            _$.util.forEach(hndlrName, function (fn) {
+                            jQuery.each(hndlrName, function (i, fn) {
                                 if (typeof fn === 'string') {
-                                    _$.event.evntCache[evntName].push(_$.event.getHandler(fn));
+                                    vertebrae.event.evntCache[evntName].push(vertebrae.event.getHandler(fn));
                                 }
                                 else if (typeof fn === 'function') {
-                                    _$.event.evntCache[evntName].push(fn);
+                                    vertebrae.event.evntCache[evntName].push(fn);
                                 }
                             });
                         }
@@ -419,70 +408,27 @@
 
         },
 
-        /*
-        *
-        *   Vertebrae 'Utility' Module
-        *
-        */
-        util: {
+        tmpl: {
 
             /*
-            *   forEach() - get a custom event handler from cache
+            *   mustache() - wrapper for Mustache.to_html() to make it pretty =)
             *
-            *       hndlrName [string] [not optional]
-            *           the name of the handler to get
+            *       tmpl [object] OR [string] [not optional]
+            *           the jquery template object to which data will be bound or a selector string
+            *
+            *       data [object] [not optional]
+            *           the model used by mustache framework to bind the template
             *
             */
-            forEach: function (array, fn) {
-
-                if (array instanceof Array && typeof fn === 'function') {
-                    var len = array.length;
-                    for (var i = 0; i < len; i++) {
-                        //call fn with the item in the array and the index of item
-                        if (fn.call(array, array[i], i) === false) {
-                            break;
+            mustache: function (template, data, partial, stream) {
+                if (Mustache && typeof data === 'object') {
+                    if (!template instanceof jQuery) {
+                        if (typeof template === 'string') {
+                            template = $(template);
                         }
                     }
+                    return $(Mustache.to_html(template.text(), data, partial, stream));
                 }
-            },
-
-            /*
-            *   extend() - extend one object with another
-            *
-            *       destination [object] [not optional]
-            *           the object to extend
-            *
-            *       source [object] OR [array(objects)] [not optional]
-            *           the object or objects to extend the destination with
-            *
-            */
-            extend: function (destination, source) {
-
-                if (destination && source) {
-                    if (source instanceof Array) {
-
-                        _$.util.forEach(source, function (obj) {
-                            for (var prop in obj) {
-                                destination[prop] = obj[prop];
-                            }
-                        });
-                    }
-
-                    //if not multiple sources
-                    else {
-                        for (var prop in source) {
-                            destination[prop] = source[prop];
-                        }
-                    }
-                }
-            },
-
-            /*
-            *   pageName() - return the current pages name (with extension)
-            *
-            */
-            pageName: function () {
-                return (window.location.pathname).substring((window.location.pathname).lastIndexOf('/') + 1);
             }
 
         },
@@ -530,7 +476,7 @@
                         }
                         else if (intDay == 29) {
                             if ((intYear % 4 == 0) && (intYear % 100 != 0) ||
-                             (intYear % 400 == 0)) {
+                                 (intYear % 400 == 0)) {
                                 return true;
                             }
                         }
@@ -539,7 +485,6 @@
                 return false;
             }
         }
-
     };
 
     return (window.vertebrae = window._$ = vertebrae);
