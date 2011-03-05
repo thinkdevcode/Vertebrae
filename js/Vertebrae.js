@@ -44,22 +44,16 @@
             *
             */
             add: function (ctrlName, jqObject) {
-
                 this.cache = this.cache || {};
-
                 if (typeof ctrlName === 'string') {
                     if (jqObject instanceof jQuery) {
-
                         if (!this.cache[ctrlName]) {
                             this.cache[ctrlName] = jqObject;
                         }
                     }
-                }
-
-                if (typeof ctrlName === 'object') {
+                } if (typeof ctrlName === 'object') {
                     jQuery.extend(this.cache, ctrlName);
                 }
-
             },
 
             /*
@@ -73,17 +67,13 @@
             *
             */
             upd: function (ctrlName, jqObject) {
-
                 if (typeof ctrlName === 'string') {
                     if (jqObject instanceof jQuery) {
-
                         if (this.cache) {
                             this.cache[ctrlName] = jqObject;
                         }
                     }
-                }
-
-                else if (typeof ctrlName === 'object') {
+                } else if (typeof ctrlName === 'object') {
                     jQuery.extend(this.cache, ctrlName);
                 }
             },
@@ -96,15 +86,12 @@
             *
             */
             get: function (ctrlName) {
-
                 if (typeof ctrlName === 'string') {
-
                     if (this.cache && this.cache[ctrlName]) {
                         return this.cache[ctrlName];
                     }
                 }
             }
-
         },
 
         /*
@@ -122,11 +109,8 @@
             *
             */
             addHandler: function (serviceName) {
-
                 if (typeof serviceName === 'string') {
-
                     if (!this[serviceName]) {
-
                         //create new function with handler name
                         //  obj [object] OR [null] [not optional] 
                         //  succ [function] [optional]
@@ -134,69 +118,33 @@
                         //  pre [function] [optional]
                         //  sync [boolean] [optional]
                         this[serviceName] = function (obj, succ, err, pre, sync) {
-
                             var currpage = this.pageName();
-
                             jQuery.ajax({
-
-                                //use POST when dealing with .NET
                                 type: 'POST',
-
                                 async: ((typeof sync === 'boolean') ? sync : true),
-
-                                //ex: 'Default.aspx/GetUsers'
                                 url: (currpage !== '') ?
                                         (currpage + '/' + serviceName) :
                                             (typeof this.defPageName === 'string') ?
                                                 (this.defPageName + '/' + serviceName) :
                                                     null, //passing null will throw the error callback
-
-                                //if no paramaters, pass in null, else stringify the json object (requires json2.js) 
                                 data: (obj === null) ? '{}' : JSON.stringify(obj),
-
-                                //content type used with .NET
                                 contentType: 'application/json; charset=utf-8',
-
-                                //default data type 
                                 dataType: 'json',
-
-                                //if pre-send callback exists, use it, else use blank function
                                 beforeSend: pre || function () { },
-
-                                //if error callback exists, use it, else use blank function
                                 error: err || function () { },
-
-                                //success function recieves json data from data service
                                 success: function (e) {
-
-                                    //verify success callback exists and is a function
                                     if (typeof succ === 'function') {
-
-                                        //if data that is returned is an array, do not parse
-                                        if (e.d instanceof Array) {
+                                        if (typeof e.d === 'string' && e.d.indexOf(':') != -1 && e.d.indexOf('{') != -1 && e.d.indexOf('}') != -1) {
+                                            succ(JSON.parse(e.d));
+                                        } else {
                                             succ(e.d);
-                                        }
-
-                                        else {
-
-                                            //data is json - parse and send back to success callback (requires json2.js)
-                                            //todo - add better regex to determine if json object
-                                            if (e.d.indexOf(':') != -1 && e.d.indexOf('{') != -1 && e.d.indexOf('}') != -1) {
-                                                succ(JSON.parse(e.d));
-                                            }
-
-                                            //probably simple value - such as string - return solo value
-                                            else {
-                                                succ(e.d);
-                                            }
                                         }
                                     }
                                 }
                             });
                         };
                     }
-                }
-                else if (serviceName instanceof Array) {
+                } else if (serviceName instanceof Array) {
                     jQuery.each(serviceName, function (i, x) { vertebrae.data.addHandler(x); });
                 }
             },
@@ -260,19 +208,13 @@
             *
             */
             fire: function (evntName) {
-
                 if (this.evntCache) {
                     if (typeof evntName === 'string') {
-
                         if (this.evntCache[evntName]) {
                             jQuery.each(this.evntCache[evntName], function (i, fn) { fn(); });
                         }
-                    }
-
-                    else if (evntName instanceof Array) {
-
+                    } else if (evntName instanceof Array) {
                         jQuery.each(evntName, function (evnt) {
-
                             if (this.evntCache[evnt]) {
                                 jQuery.each(this.evntCache[evnt], function (i, fn) { fn(); });
                             }
@@ -299,8 +241,7 @@
                             this.hndlrCache[hndlrName] = hndlrFn;
                         }
                     }
-                }
-                else if (typeof hndlrName === 'object') {
+                } else if (typeof hndlrName === 'object') {
                     jQuery.extend(this.hndlrCache, hndlrName);
                 }
             },
@@ -335,23 +276,16 @@
             */
             add: function (evntName, hndlrName, ctrlName) {
                 this.evntCache = this.evntCache || {};
-
                 if (typeof evntName === 'string') {
                     if (typeof hndlrName === 'string') {
-
                         var hndlr = this.getHandler(hndlrName);
-
                         if (typeof hndlr === 'function') {
                             if (typeof ctrlName === 'string') {
-
                                 var ctrl = vertebrae.view.get(ctrlName); //grab the jQuery object from view cache
-
                                 if (ctrl instanceof jQuery) {
                                     ctrl.bind(evntName, hndlr);
                                 }
-                            }
-                            // create a custom event
-                            else {
+                            } else {
                                 this.evntCache[evntName] = this.evntCache[evntName] || [];
                                 this.evntCache[evntName].push(hndlr);
                             }
@@ -359,45 +293,36 @@
                     }
                     else if (typeof hndlrName === 'function') {
                         if (typeof ctrlName === 'string') {
-                            
                             var ctrl = vertebrae.view.get(ctrlName); //grab the jQuery object from view cache
                             if (ctrl instanceof jQuery) {
                                 ctrl.bind(evntName, hndlrName);
                             }
-                        }
-                        // create a custom event
-                        else {
+                        } else {
                             this.evntCache[evntName] = this.evntCache[evntName] || [];
                             this.evntCache[evntName].push(hndlrName);
                         }
                     }
                     else if (hndlrName instanceof Array) {
                         if (typeof ctrlName === 'string') {
-                            
                             var ctrl = vertebrae.view.get(ctrlName); //grab the jQuery object from view cache
-
                             if (ctrl instanceof jQuery) {
                                 //loop through and bind events to jQuery object
                                 jQuery.each(hndlrName, function (i, fn) {
                                     if (typeof fn === 'string') {
                                         ctrl.bind(evntName, vertebrae.event.getHandler(fn));
-                                    }
-                                    else if (typeof fn === 'function') {
+                                    } else if (typeof fn === 'function') {
                                         ctrl.bind(evntName, fn);
                                     }
                                 });
                             }
-                        }
-                        // create a custom event
-                        else {
+                        } else {
                             //add a new event to custom cache if one doesnt already exist
                             this.evntCache[evntName] = this.evntCache[evntName] || [];
                             //loop through and push the hndlr's onto the events stack
                             jQuery.each(hndlrName, function (i, fn) {
                                 if (typeof fn === 'string') {
                                     vertebrae.event.evntCache[evntName].push(vertebrae.event.getHandler(fn));
-                                }
-                                else if (typeof fn === 'function') {
+                                } else if (typeof fn === 'function') {
                                     vertebrae.event.evntCache[evntName].push(fn);
                                 }
                             });
@@ -427,7 +352,7 @@
                             template = $(template);
                         }
                     }
-                    return $(Mustache.to_html(template.text(), data, partial, stream));
+                    return $(Mustache.to_html(template.get(0).text, data, partial, stream));
                 }
             }
 
@@ -485,7 +410,6 @@
                 return false;
             }
         }
-
     };
 
     return (window.vertebrae = window._$ = vertebrae);
